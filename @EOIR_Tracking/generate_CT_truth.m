@@ -1,0 +1,29 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                            Airborne EO/IR Sensor Tracking                                 %
+%                     Copyright @2015_DRDC, version 01_02112015                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                               S.Rajiv,  and B.Balaji                                      %
+%          Defence R&D Canada, 3701 Carling Avenue, Ottawa, ON, K1A 0Z4, Canada.            %
+%          Rajiv.Sithiravel@drdc-rddc.gc.ca and Bhashyam.Balaji@drdc-rddc.gc.ca             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [temp_truth, temp] = generate_CT_truth( temp_truth , temp , X , T )
+
+t = temp_truth(end,1) ;
+temp_F = X.F ;
+temp = [ temp ; X.angular_rate ] ; 
+% For all time steps
+for j=1 : X.duration
+    t = t + T ;
+    temp = temp_F*temp + X.Q*diag(sqrt(X.V)*randn(1,3)) ;
+    w =  temp(5) ;
+    temp_F = [  1  sin(w*T)/w     0  (cos(w*T)-1)/w 0  ;
+                0  cos(w*T)       0  -sin(w*T)      0  ;
+                0 (1-cos(w*T))/w  1  sin(w*T)/w     0  ;
+                0  sin(w*T)       0  cos(w*T)       0  ;
+                0  0              0  0              1 ] ;
+    temp_truth = [ temp_truth ; [ t , temp(1:4)'] ] ;
+end
+
+temp = temp(1:4) ;
+
+end
